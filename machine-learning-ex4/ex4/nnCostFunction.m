@@ -68,10 +68,33 @@ for i = 1:num_labels
     by = y == i;
     J += (-by' * log(h(:, i)) - (1 - by)' * log(1 - h(:, i))) / m;
 end
+J += (sum(sum(Theta1(:, 2:end).^2)) + sum(sum(Theta2(:, 2:end).^2))) * lambda / (2 * m);
 
 
+for t = 1:m
+    a1 = (X(t, :))';
+    z2 = Theta1 * a1;
+    a2 = [1; sigmoid(z2)];
+    z3 = Theta2 * a2;
+    a3 = sigmoid(z3);
+    
+    yk = zeros(num_labels, 1);
+    yk(y(t)) = 1;
+    d3 = a3 - yk;
+
+    d2 = (Theta2' * d3)(2:end) .* sigmoidGradient(z2);
+
+    Theta1_grad += d2 * a1';
+    Theta2_grad += d3 * a2';
+end
+Theta1_grad /= m;
+Theta2_grad /= m; 
 
 
+Theta1(:, 1) = 0;
+Theta2(:, 1) = 0;
+Theta1_grad += Theta1 * lambda / m;
+Theta2_grad += Theta2 * lambda / m; 
 
 
 
